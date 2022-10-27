@@ -1,3 +1,5 @@
+import TagIcon from "@mui/icons-material/Tag";
+import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   Avatar,
@@ -7,23 +9,52 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import TagIcon from "@mui/icons-material/Tag";
-import { LoadingButton } from "@mui/lab";
-import { Link } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  updateProfile,
+} from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
+import md5 from "md5";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import "../firebase";
+import { setUser } from "../store/userReducer";
 const Join = () => {
-  const [error, setError] = useState("");
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
     getValues,
     formState: { errors },
   } = useForm();
-  const handleSubmitForm = (data) => {};
-  // useEffect(() => {
-  //   console.log(errors[Object.keys(errors)[0]].message);
-  // }, [errors]);
+  const handleSubmitForm = (data) => {
+    postUserData(data.name, data.email, data.password);
+  };
+  const [loading, setLoading] = useState(false);
+  const postUserData = async (name, email, password) => {
+    setLoading(true);
+    try {
+      const { user } = await createUserWithEmailAndPassword(
+        getAuth(),
+        email,
+        password
+      );
+      await updateProfile(user, {
+        displayName: name,
+        photoURL: `https://www.gravatar.com/avatar/${md5(email)}?d=retro`,
+      });
+      await set(ref(getDatabase(), "users/" + user.uid), {
+        name: user.displayName,
+        avatar: user.photoURL,
+      });
+      dispatch(setUser(user));
+    } catch (e) {
+      setLoading(false);
+    }
+  };
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -59,8 +90,9 @@ const Join = () => {
                 {...register("name", {
                   required: "닉네임을 입력하세요",
                   pattern: {
-                    value: /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]{1,10}$/,
-                    message: "닉네임은 영문,한글,숫자 및 10글자 미만입니다",
+                    value: /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]{2,10}$/,
+                    message:
+                      "닉네임은 영문,한글,숫자이고 2글자 이상 10글자 미만입니다",
                   },
                 })}
               />
@@ -120,15 +152,20 @@ const Join = () => {
               />
             </Grid>
           </Grid>
-          <Alert sx={{ mt: 3 }} severity="error">
-            {errors[Object.keys(errors)[0]]?.message}
-          </Alert>
+
+          {Object.keys(errors).length ? (
+            <Alert sx={{ mt: 3 }} severity="error">
+              {errors[Object.keys(errors)[0]]?.message}
+            </Alert>
+          ) : null}
+
           <LoadingButton
             type="submit"
             fullWidth
             variant="contained"
             color="secondary"
             sx={{ mt: 3, mb: 2 }}
+            loading={loading}
           >
             회원가입
           </LoadingButton>
