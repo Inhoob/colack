@@ -24,12 +24,9 @@ function App() {
   }, [dispatch]);
   return (
     <Routes>
-      <Route path="/" element={<Main />}></Route>
-      <Route path="/login" element={<Login />}></Route>
-      <Route
-        path="/join"
-        element={currentUser ? <Navigate to="/" /> : <Join />}
-      ></Route>
+      <Route path="/" element={currentUser ? <Main /> : <Navigate to="/login"></Navigate>}></Route>
+      <Route path="/login" element={currentUser ? <Navigate to="/" /> : <Login />}></Route>
+      <Route path="/join" element={currentUser ? <Navigate to="/" /> : <Join />}></Route>
     </Routes>
   );
 }
