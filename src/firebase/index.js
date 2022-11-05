@@ -7,8 +7,7 @@ import { initializeApp } from "firebase/app";
 const firebaseConfig = {
   apiKey: "AIzaSyCscE2o2I6UUpFR1etJn_LNoKibdFsEOpI",
   authDomain: "colack-65c46.firebaseapp.com",
-  databaseURL:
-    "https://colack-65c46-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://colack-65c46-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "colack-65c46",
   storageBucket: "colack-65c46.appspot.com",
   messagingSenderId: "333704716726",

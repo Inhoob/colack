@@ -14,17 +14,54 @@ import {
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowdropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import "../firebase";
+import { getDatabase, push, ref, child, update, onChildAdded } from "firebase/database";
 const ChannelMenu = () => {
   const [open, setOpen] = useState(false);
   const [channelName, setChannelName] = useState("");
   const [channelDetail, setChannelDetail] = useState("");
+  const [channels, setChannels] = useState([]);
   const handleClickOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
   };
+  const handleSubmit = useCallback(async () => {
+    const db = getDatabase();
+    const key = push(child(ref(db), "channels")).key; //update method 사용이다.
+    const newChannel = {
+      id: key,
+      name: channelName,
+      details: channelDetail,
+    };
+    const updates = {};
+    updates["/channels/" + key] = newChannel;
+    try {
+      await update(ref(db), updates);
+      setChannelName("");
+      setChannelDetail("");
+      handleClose();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [channelDetail, channelName]);
+  //mount 된 다음에 정보를 어떻게 가져오는가?
+  useEffect(() => {
+    const db = getDatabase();
+    //onchildadded => unsubscribe 함수를 리턴
+
+    const unsubscribe = onChildAdded(ref(db, "channels"), (snapshot) => {
+      setChannels((channelArr) => [...channelArr, snapshot.val()]);
+    }); // channels 파일에서 등록된 이벤트 발생 순간 채널들의 정보를 가져오기 위해
+
+    return () => {
+      setChannels([]);
+      unsubscribe();
+    };
+  }, []);
+
   return (
     <>
       <List sx={{ overflow: "auto", width: 240, backgroundColor: "#4c3c4c" }}>
@@ -40,6 +77,14 @@ const ChannelMenu = () => {
           </ListItemIcon>
           <ListItemText primary="채널" sx={{ wordBreak: "break-all", color: "#9a939b" }} />
         </ListItem>
+        {
+          //TODO store 구현, selected 구현
+          channels.map((channel) => (
+            <ListItem button key={channel.id}>
+              <ListItemText primary={`# ${channel.name}`} sx={{ wordBreak: "break-all", color: "#918890" }} />
+            </ListItem>
+          ))
+        }
       </List>
 
       <Dialog open={open} onClose={handleClose}>
@@ -51,7 +96,7 @@ const ChannelMenu = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
-          <Button>생성</Button>
+          <Button onClick={handleSubmit}>생성</Button>
         </DialogActions>
       </Dialog>
     </>
