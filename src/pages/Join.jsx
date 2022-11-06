@@ -1,22 +1,10 @@
 import TagIcon from "@mui/icons-material/Tag";
 import { LoadingButton } from "@mui/lab";
-import {
-  Alert,
-  Avatar,
-  Box,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-} from "@mui/material";
-import {
-  createUserWithEmailAndPassword,
-  getAuth,
-  updateProfile,
-} from "firebase/auth";
+import { Alert, Avatar, Box, Container, Grid, TextField, Typography } from "@mui/material";
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 import md5 from "md5";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
@@ -30,31 +18,34 @@ const Join = () => {
     getValues,
     formState: { errors },
   } = useForm();
-  const handleSubmitForm = (data) => {
-    postUserData(data.name, data.email, data.password);
-  };
+  const postUserData = useCallback(
+    async (name, email, password) => {
+      setLoading(true);
+      try {
+        const { user } = await createUserWithEmailAndPassword(getAuth(), email, password);
+        await updateProfile(user, {
+          displayName: name,
+          photoURL: `https://www.gravatar.com/avatar/${md5(email)}?d=retro`,
+        });
+        await set(ref(getDatabase(), "users/" + user.uid), {
+          name: user.displayName,
+          avatar: user.photoURL,
+        });
+        dispatch(setUser(user));
+      } catch (e) {
+        setLoading(false);
+      }
+    },
+    [dispatch]
+  );
+  const handleSubmitForm = useCallback(
+    (data) => {
+      postUserData(data.name, data.email, data.password);
+    },
+    [postUserData]
+  );
   const [loading, setLoading] = useState(false);
-  const postUserData = async (name, email, password) => {
-    setLoading(true);
-    try {
-      const { user } = await createUserWithEmailAndPassword(
-        getAuth(),
-        email,
-        password
-      );
-      await updateProfile(user, {
-        displayName: name,
-        photoURL: `https://www.gravatar.com/avatar/${md5(email)}?d=retro`,
-      });
-      await set(ref(getDatabase(), "users/" + user.uid), {
-        name: user.displayName,
-        avatar: user.photoURL,
-      });
-      dispatch(setUser(user));
-    } catch (e) {
-      setLoading(false);
-    }
-  };
+
   return (
     <Container component="main" maxWidth="xs">
       <Box
@@ -72,12 +63,7 @@ const Join = () => {
         <Typography component="h1" variant="h5">
           회원가입
         </Typography>
-        <Box
-          component="form"
-          noValidate
-          onSubmit={handleSubmit(handleSubmitForm)}
-          sx={{ mt: 3 }}
-        >
+        <Box component="form" noValidate onSubmit={handleSubmit(handleSubmitForm)} sx={{ mt: 3 }}>
           <Grid container spasing={2}>
             <Grid item xs={12}>
               <TextField
@@ -91,8 +77,7 @@ const Join = () => {
                   required: "닉네임을 입력하세요",
                   pattern: {
                     value: /^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]{2,10}$/,
-                    message:
-                      "닉네임은 영문,한글,숫자이고 2글자 이상 10글자 미만입니다",
+                    message: "닉네임은 영문,한글,숫자이고 2글자 이상 10글자 미만입니다",
                   },
                 })}
               />
@@ -125,10 +110,8 @@ const Join = () => {
                 {...register("password", {
                   required: "password를 입력해주세요",
                   pattern: {
-                    value:
-                      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-                    message:
-                      "비밀번호는 영문자,숫자,특수문자 포함 8글자이상으로 해주세요",
+                    value: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+                    message: "비밀번호는 영문자,숫자,특수문자 포함 8글자이상으로 해주세요",
                   },
                 })}
               />
@@ -159,22 +142,12 @@ const Join = () => {
             </Alert>
           ) : null}
 
-          <LoadingButton
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="secondary"
-            sx={{ mt: 3, mb: 2 }}
-            loading={loading}
-          >
+          <LoadingButton type="submit" fullWidth variant="contained" color="secondary" sx={{ mt: 3, mb: 2 }} loading={loading}>
             회원가입
           </LoadingButton>
           <Grid container justifyContent="flex-end">
             <Grid item>
-              <Link
-                to="/login"
-                style={{ textDecoration: "none", color: "blue" }}
-              >
+              <Link to="/login" style={{ textDecoration: "none", color: "blue" }}>
                 이미 계정이 있나요? 로그인으로 이동
               </Link>
             </Grid>

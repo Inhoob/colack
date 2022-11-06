@@ -27,12 +27,30 @@ const ChannelMenu = () => {
   const [activeChannelId, setActiveChannelId] = useState(0);
   const [firstLoaded, setFirstLoaded] = useState(true);
   const dispatch = useDispatch();
-  const handleClickOpen = () => {
+
+  const changeChannel = useCallback(
+    (channel) => {
+      if (channel.id === activeChannelId) return;
+      setActiveChannelId(channel.id);
+      dispatch(setCurrentChannel(channel));
+    },
+    [activeChannelId, dispatch]
+  );
+
+  const handleClickOpen = useCallback(() => {
     setOpen(true);
-  };
-  const handleClose = () => {
+  }, []);
+
+  const handleClose = useCallback(() => {
     setOpen(false);
-  };
+  }, []);
+
+  const handleClickChannelItem = useCallback((channel) => changeChannel(channel), [changeChannel]);
+
+  const handleChangeChannelName = useCallback((e) => setChannelName(e.target.value), []);
+
+  const handleChangeChannelDetail = useCallback((e) => setChannelDetail(e.target.value), []);
+
   const handleSubmit = useCallback(async () => {
     const db = getDatabase();
     const key = push(child(ref(db), "channels")).key; //update method 사용이다.
@@ -51,17 +69,12 @@ const ChannelMenu = () => {
     } catch (error) {
       console.error(error);
     }
-  }, [channelDetail, channelName]);
+  }, [channelDetail, channelName, handleClose]);
   //mount 된 다음에 정보를 어떻게 가져오는가?
-  const changeChannel = (channel) => {
-    setActiveChannelId(channel.id);
-    dispatch(setCurrentChannel(channel));
-    setFirstLoaded(false);
-  };
+
   useEffect(() => {
     const db = getDatabase();
     //onchildadded => unsubscribe 함수를 리턴
-
     const unsubscribe = onChildAdded(ref(db, "channels"), (snapshot) => {
       setChannels((channelArr) => [...channelArr, snapshot.val()]);
     }); // channels 파일에서 등록된 이벤트 발생 순간 채널들의 정보를 가져오기 위해
@@ -99,7 +112,7 @@ const ChannelMenu = () => {
           {
             //TODO store 구현, selected 구현
             channels.map((channel) => (
-              <ListItem button key={channel.id} onClick={() => changeChannel(channel)} selected={channel.id === activeChannelId}>
+              <ListItem button key={channel.id} onClick={() => handleClickChannelItem(channel)} selected={channel.id === activeChannelId}>
                 <ListItemText primary={`# ${channel.name}`} sx={{ wordBreak: "break-all", color: "#918890" }} />
               </ListItem>
             ))
@@ -111,8 +124,8 @@ const ChannelMenu = () => {
         <DialogTitle>채널 추가</DialogTitle>
         <DialogContent>
           <DialogContentText>생성할 채널명과 설명을 입력해주세요</DialogContentText>
-          <TextField autoFocus margin="dense" label="채널명" type="text" fullWidth variant="standard" onChange={(e) => setChannelName(e.target.value)} />
-          <TextField margin="dense" label="설명" type="text" fullWidth variant="standard" onChange={(e) => setChannelDetail(e.target.value)} />
+          <TextField margin="dense" label="채널명" type="text" fullWidth variant="standard" onChange={handleChangeChannelName} autoComplete="off" autoFocus />
+          <TextField margin="dense" label="설명" type="text" fullWidth variant="standard" onChange={handleChangeChannelDetail} autoComplete="off" />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
