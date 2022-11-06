@@ -17,11 +17,16 @@ import ArrowdropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useCallback, useEffect, useState } from "react";
 import "../firebase";
 import { getDatabase, push, ref, child, update, onChildAdded } from "firebase/database";
+import { useDispatch } from "react-redux";
+import { setCurrentChannel } from "../store/channelReducer";
 const ChannelMenu = () => {
   const [open, setOpen] = useState(false);
   const [channelName, setChannelName] = useState("");
   const [channelDetail, setChannelDetail] = useState("");
   const [channels, setChannels] = useState([]);
+  const [activeChannelId, setActiveChannelId] = useState(0);
+  const [firstLoaded, setFirstLoaded] = useState(true);
+  const dispatch = useDispatch();
   const handleClickOpen = () => {
     setOpen(true);
   };
@@ -48,6 +53,11 @@ const ChannelMenu = () => {
     }
   }, [channelDetail, channelName]);
   //mount 된 다음에 정보를 어떻게 가져오는가?
+  const changeChannel = (channel) => {
+    setActiveChannelId(channel.id);
+    dispatch(setCurrentChannel(channel));
+    setFirstLoaded(false);
+  };
   useEffect(() => {
     const db = getDatabase();
     //onchildadded => unsubscribe 함수를 리턴
@@ -61,6 +71,14 @@ const ChannelMenu = () => {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    if (channels.length > 0 && firstLoaded === true) {
+      setActiveChannelId(channels[0].id);
+      dispatch(setCurrentChannel(channels[0]));
+      setFirstLoaded(false);
+    }
+  }, [channels, dispatch, firstLoaded]);
 
   return (
     <>
@@ -77,14 +95,16 @@ const ChannelMenu = () => {
           </ListItemIcon>
           <ListItemText primary="채널" sx={{ wordBreak: "break-all", color: "#9a939b" }} />
         </ListItem>
-        {
-          //TODO store 구현, selected 구현
-          channels.map((channel) => (
-            <ListItem button key={channel.id}>
-              <ListItemText primary={`# ${channel.name}`} sx={{ wordBreak: "break-all", color: "#918890" }} />
-            </ListItem>
-          ))
-        }
+        <List component="div" disablePadding sx={{ pl: 3 }}>
+          {
+            //TODO store 구현, selected 구현
+            channels.map((channel) => (
+              <ListItem button key={channel.id} onClick={() => changeChannel(channel)} selected={channel.id === activeChannelId}>
+                <ListItemText primary={`# ${channel.name}`} sx={{ wordBreak: "break-all", color: "#918890" }} />
+              </ListItem>
+            ))
+          }
+        </List>
       </List>
 
       <Dialog open={open} onClose={handleClose}>
