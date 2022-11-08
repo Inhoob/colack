@@ -7,7 +7,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useCallback } from "react";
 import ProfileModal from "./Modal/ProfileModal";
 const Header = () => {
-  const { user } = useSelector((state) => state);
+  const { user, theme } = useSelector((state) => state);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
@@ -29,16 +29,15 @@ const Header = () => {
   const handleCloseProfileModal = useCallback(() => {
     setShowProfileModal(false);
   }, []);
-  console.log(showProfileModal);
+
   return (
     <>
       <AppBar
         position="fixed"
-        //TODO : backgroundcolor theme 적용
         sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
           color: "#9a939b",
-          backgroundColor: "4c3c4c",
+          backgroundColor: theme.mainTheme,
         }}
       >
         <Toolbar

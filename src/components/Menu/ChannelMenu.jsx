@@ -15,10 +15,10 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import ArrowdropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useCallback, useEffect, useState } from "react";
-import "../firebase";
+import "../../firebase";
 import { getDatabase, push, ref, child, update, onChildAdded } from "firebase/database";
 import { useDispatch } from "react-redux";
-import { setCurrentChannel } from "../store/channelReducer";
+import { setCurrentChannel } from "../../store/channelReducer";
 const ChannelMenu = () => {
   const [open, setOpen] = useState(false);
   const [channelName, setChannelName] = useState("");
@@ -112,7 +112,12 @@ const ChannelMenu = () => {
           {
             //TODO store 구현, selected 구현
             channels.map((channel) => (
-              <ListItem button key={channel.id} onClick={() => handleClickChannelItem(channel)} selected={channel.id === activeChannelId}>
+              <ListItem
+                button
+                key={channel.id}
+                onClick={() => handleClickChannelItem(channel)}
+                selected={channel.id === activeChannelId}
+              >
                 <ListItemText primary={`# ${channel.name}`} sx={{ wordBreak: "break-all", color: "#918890" }} />
               </ListItem>
             ))
@@ -124,8 +129,25 @@ const ChannelMenu = () => {
         <DialogTitle>채널 추가</DialogTitle>
         <DialogContent>
           <DialogContentText>생성할 채널명과 설명을 입력해주세요</DialogContentText>
-          <TextField margin="dense" label="채널명" type="text" fullWidth variant="standard" onChange={handleChangeChannelName} autoComplete="off" autoFocus />
-          <TextField margin="dense" label="설명" type="text" fullWidth variant="standard" onChange={handleChangeChannelDetail} autoComplete="off" />
+          <TextField
+            margin="dense"
+            label="채널명"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={handleChangeChannelName}
+            autoComplete="off"
+            autoFocus
+          />
+          <TextField
+            margin="dense"
+            label="설명"
+            type="text"
+            fullWidth
+            variant="standard"
+            onChange={handleChangeChannelDetail}
+            autoComplete="off"
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>취소</Button>
