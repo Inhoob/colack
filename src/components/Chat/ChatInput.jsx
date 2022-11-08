@@ -95,6 +95,7 @@ function ChatInput() {
           value={message}
           onChange={handleChange}
         />
+        {/**아래 부분이 프로그레스바 */}
         {uploading ? (
           <Grid item xs={12} sx={{ m: "10px" }}>
             <LinearProgress variant="determinate" value={percent} />

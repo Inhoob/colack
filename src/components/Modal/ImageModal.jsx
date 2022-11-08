@@ -36,6 +36,7 @@ function ImageModal({ open, handleClose, setPercent, setUploading }) {
       (snap) => {
         const percentUploaded = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
         setPercent(percentUploaded);
+        //percent는 progress bar 구현에 필요
       },
       (error) => {
         console.error(error);
@@ -44,7 +45,10 @@ function ImageModal({ open, handleClose, setPercent, setUploading }) {
       async () => {
         try {
           const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          await set(push(ref(getDatabase(), "messages/" + channel.currentChannel?.id)), createImageMessage(downloadUrl));
+          await set(
+            push(ref(getDatabase(), "messages/" + channel.currentChannel?.id)),
+            createImageMessage(downloadUrl)
+          );
           setUploading(false);
           unsubscribe();
         } catch (error) {
