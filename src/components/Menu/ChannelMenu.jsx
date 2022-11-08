@@ -17,9 +17,10 @@ import ArrowdropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { useCallback, useEffect, useState } from "react";
 import "../../firebase";
 import { getDatabase, push, ref, child, update, onChildAdded } from "firebase/database";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCurrentChannel } from "../../store/channelReducer";
 const ChannelMenu = () => {
+  const { theme } = useSelector((state) => state);
   const [open, setOpen] = useState(false);
   const [channelName, setChannelName] = useState("");
   const [channelDetail, setChannelDetail] = useState("");
@@ -95,7 +96,7 @@ const ChannelMenu = () => {
 
   return (
     <>
-      <List sx={{ overflow: "auto", width: 240, backgroundColor: "#4c3c4c" }}>
+      <List sx={{ overflow: "auto", width: 240, backgroundColor: theme.mainTheme }}>
         <ListItem
           secondaryAction={
             <IconButton sx={{ color: "#9a939b" }} onClick={handleClickOpen}>
