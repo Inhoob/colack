@@ -40,19 +40,23 @@ function ChatInput() {
     [message, user.currentUser.uid, user.currentUser.displayName, user.currentUser.photoURL]
   );
 
-  const clickSendMessage = useCallback(async () => {
-    if (!message) return;
-    setLoading(true);
-    try {
-      await set(push(ref(getDatabase(), "messages/" + channel.currentChannel.id)), createMessage());
-      setLoading(false);
-      setMessage("");
-      setShowEmoji(false);
-    } catch (error) {
-      console.error(error);
-      setLoading(false);
-    }
-  }, [message, channel.currentChannel?.id, createMessage]);
+  const clickSendMessage = useCallback(
+    async (e) => {
+      e.preventDefault();
+      if (!message) return;
+      setLoading(true);
+      try {
+        await set(push(ref(getDatabase(), "messages/" + channel.currentChannel.id)), createMessage());
+        setLoading(false);
+        setMessage("");
+        setShowEmoji(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    },
+    [message, channel.currentChannel?.id, createMessage]
+  );
 
   const handleSelectEmoji = useCallback((e) => {
     const sym = e.unified.split("-");
@@ -63,12 +67,11 @@ function ChatInput() {
   }, []);
 
   return (
-    <Grid container sx={{ p: "20px" }}>
+    <Grid container sx={{ p: "20px" }} component="form" onSubmit={clickSendMessage}>
       <Grid item xs={12} sx={{ position: "relative" }}>
         <div style={{ position: "absolute", bottom: "80px" }}>
           {showEmoji && <Picker data={data} title="이모지를 선택하세요." onEmojiSelect={handleSelectEmoji} />}
         </div>
-
         <TextField
           InputProps={{
             startAdornment: (

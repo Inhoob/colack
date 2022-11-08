@@ -5,17 +5,31 @@ import { useSelector } from "react-redux";
 import "../firebase";
 import { getAuth, signOut } from "firebase/auth";
 import { useCallback } from "react";
+import ProfileModal from "./Modal/ProfileModal";
 const Header = () => {
   const { user } = useSelector((state) => state);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
   const handleOpenMenu = useCallback((event) => {
     setAnchorEl(event.currentTarget);
   }, []);
+
   const handleCloseMenu = useCallback(() => setAnchorEl(null), []);
+
   const handleLogout = useCallback(async () => {
     await signOut(getAuth());
   }, []);
 
+  const handleClickOpen = useCallback(() => {
+    setShowProfileModal(true);
+    handleCloseMenu();
+  }, [handleCloseMenu]);
+
+  const handleCloseProfileModal = useCallback(() => {
+    setShowProfileModal(false);
+  }, []);
+  console.log(showProfileModal);
   return (
     <>
       <AppBar
@@ -55,7 +69,9 @@ const Header = () => {
               onClose={handleCloseMenu}
             >
               <MenuItem>
-                <Typography textAlign="center">프로필 이미지</Typography>
+                <Typography onClick={handleClickOpen} textAlign="center">
+                  프로필 이미지
+                </Typography>
               </MenuItem>
               <MenuItem onClick={handleLogout}>
                 <Typography textAlign="center">LogOut</Typography>
@@ -64,6 +80,7 @@ const Header = () => {
           </Box>
         </Toolbar>
       </AppBar>
+      <ProfileModal open={showProfileModal} handleClose={handleCloseProfileModal}></ProfileModal>
     </>
   );
 };
