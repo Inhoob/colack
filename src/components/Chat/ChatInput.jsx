@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import Picker from "@emoji-mart/react";
 import ImageModal from "../Modal/ImageModal";
 import data from "@emoji-mart/data";
+
 function ChatInput() {
   const { channel, user } = useSelector((state) => state);
   const [message, setMessage] = useState("");
@@ -46,6 +47,7 @@ function ChatInput() {
       await set(push(ref(getDatabase(), "messages/" + channel.currentChannel.id)), createMessage());
       setLoading(false);
       setMessage("");
+      setShowEmoji(false);
     } catch (error) {
       console.error(error);
       setLoading(false);
@@ -53,7 +55,6 @@ function ChatInput() {
   }, [message, channel.currentChannel?.id, createMessage]);
 
   const handleSelectEmoji = useCallback((e) => {
-    console.log(e.unified);
     const sym = e.unified.split("-");
     const codesArray = [];
     sym.forEach((el) => codesArray.push("0x" + el));
@@ -64,17 +65,10 @@ function ChatInput() {
   return (
     <Grid container sx={{ p: "20px" }}>
       <Grid item xs={12} sx={{ position: "relative" }}>
-        {showEmoji && (
-          <Picker
-            set="google"
-            data={data}
-            className="emojipicker"
-            title="이모지를 선택하세요."
-            onEmojiSelect={handleSelectEmoji}
-            emoji="point_up"
-            style={{ position: "absolute", bottom: "80px" }}
-          />
-        )}
+        <div style={{ position: "absolute", bottom: "80px" }}>
+          {showEmoji && <Picker data={data} title="이모지를 선택하세요." onEmojiSelect={handleSelectEmoji} />}
+        </div>
+
         <TextField
           InputProps={{
             startAdornment: (
@@ -106,7 +100,12 @@ function ChatInput() {
             <LinearProgress variant="determinate" value={percent} />
           </Grid>
         ) : null}
-        <ImageModal open={ImageModalOpen} handleClose={handleClickClose} setPercent={setPercent} setUploading={setUploading} />
+        <ImageModal
+          open={ImageModalOpen}
+          handleClose={handleClickClose}
+          setPercent={setPercent}
+          setUploading={setUploading}
+        />
       </Grid>
     </Grid>
   );
