@@ -11,6 +11,10 @@ const Header = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
+  /**TODO : 네트워크가 끊겼을 때 어떤식으로 표시할지 생각
+   * 채팅방 삭제기능
+   * 내 채팅내역 삭제기능
+   */
   const handleOpenMenu = useCallback((event) => {
     setAnchorEl(event.currentTarget);
   }, []);
