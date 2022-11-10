@@ -6,6 +6,7 @@ import ThemeMenu from "../components/Menu/ThemeMenu";
 import { useSelector } from "react-redux";
 const Main = () => {
   const { theme } = useSelector((state) => state);
+  console.log(theme.subTheme);
   return (
     <Box sx={{ display: "flex", backgroundColor: theme.subTheme }}>
       <Header />

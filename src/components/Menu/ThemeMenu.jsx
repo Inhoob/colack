@@ -62,7 +62,7 @@ function ThemeMenu() {
     <>
       <List sx={{ overflow: "auto", width: 60, backgroundColor: "#150C16" }}>
         <ListItem button onClick={handleClickOpen}>
-          <ListItemIcon sx={{ color: "white" }}>
+          <ListItemIcon sx={{ color: "white", width: "24px", minWidth: "24px" }}>
             <PaletteIcon />
           </ListItemIcon>
         </ListItem>
